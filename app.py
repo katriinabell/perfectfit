@@ -642,6 +642,16 @@ with col1:
         type=["txt", "md", "pdf", "docx"],
         help="Highly recommended: A detailed document with all your skills, achievements, metrics, and job history — more comprehensive than your resume. This gives the AI more context to selectively highlight the most relevant experience."
     )
+    # Template download
+    template_path = os.path.join(os.path.dirname(__file__), "Qualifications_Template.docx")
+    if os.path.exists(template_path):
+        with open(template_path, "rb") as f:
+            st.download_button(
+                label="Download template",
+                data=f,
+                file_name="Qualifications_Template.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
 
 with col2:
     resume_file = st.file_uploader(
