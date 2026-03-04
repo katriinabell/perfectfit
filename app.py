@@ -646,8 +646,8 @@ with col1:
 with col2:
     resume_file = st.file_uploader(
         "Current Resume",
-        type=["txt", "md", "pdf", "docx"],
-        help="Word (.docx) produces best results — formatting is preserved"
+        type=["docx"],
+        help="Word format required to preserve your original formatting"
     )
 
 # Job description input
