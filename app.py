@@ -40,7 +40,7 @@ st.set_page_config(
     layout="centered",
 )
 
-# Custom CSS for professional styling with soft green tones
+# Custom CSS for professional styling with soft green tones (light and dark mode compatible)
 st.markdown("""
 <style>
     /* Import clean sans-serif font */
@@ -51,11 +51,10 @@ st.markdown("""
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* Headers */
+    /* Headers - inherit color for dark mode compatibility */
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         font-weight: 600;
-        color: #1a1a1a;
     }
 
     /* Primary button styling - soft green */
@@ -70,15 +69,14 @@ st.markdown("""
         border: none;
     }
 
-    /* Download buttons */
+    /* Download buttons - works in both modes */
     .stDownloadButton > button {
-        background-color: #f8faf8;
-        border: 1px solid #c8d9c8;
+        border: 1px solid #4a7c59;
         color: #4a7c59;
         font-weight: 500;
     }
     .stDownloadButton > button:hover {
-        background-color: #e8f0e8;
+        background-color: rgba(74, 124, 89, 0.1);
         border: 1px solid #4a7c59;
     }
 
@@ -87,7 +85,6 @@ st.markdown("""
         gap: 8px;
     }
     .stTabs [data-baseweb="tab"] {
-        background-color: #f8faf8;
         border-radius: 4px;
         padding: 8px 16px;
         font-weight: 500;
@@ -97,22 +94,12 @@ st.markdown("""
         color: white !important;
     }
 
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background-color: #f8faf8;
-    }
-
     /* Success message */
     .stSuccess {
-        background-color: #e8f5e8;
         border-left: 4px solid #4a7c59;
     }
 
-    /* Text area and inputs */
-    .stTextArea textarea, .stTextInput input {
-        border: 1px solid #d0d9d0;
-        border-radius: 4px;
-    }
+    /* Text area and inputs focus state */
     .stTextArea textarea:focus, .stTextInput input:focus {
         border-color: #4a7c59;
         box-shadow: 0 0 0 1px #4a7c59;
@@ -120,14 +107,9 @@ st.markdown("""
 
     /* File uploader */
     [data-testid="stFileUploader"] {
-        border: 1px dashed #c8d9c8;
+        border: 1px dashed #4a7c59;
         border-radius: 4px;
         padding: 1rem;
-    }
-
-    /* Divider */
-    hr {
-        border-color: #e0e8e0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -613,53 +595,31 @@ def generate_cover_letter(
     company_name = filename_parts.get("company", "Company")
     job_title = filename_parts.get("job_title", "Position")
 
-    prompt = f"""Write a cover letter for this job application following these strict guidelines:
+    prompt = f"""Write a cover letter for {applicant_name} applying to {job_title} at {company_name}.
 
-## Style Guide (Dale Carnegie Philosophy)
-- Focus on what the COMPANY needs, not what the applicant wants
-- Open with something specific about the company/role, NOT "I am writing to apply..."
-- Connect the applicant's achievements to the company's needs
-- Be confident but not arrogant, specific but not verbose
-- NO clichés: "passionate", "team player", "detail-oriented", "excited to apply"
-- NO hollow flattery or generic compliments
-
-## Format (Email Cover Letter)
-- NO formal header block (no address/date block) - this is an email
-- Greeting: "Dear Hiring Manager," (or hiring manager name if in job posting)
-- Body: exactly 3 paragraphs, 150-250 words total
-  - P1 (2-4 sentences): Open with company insight, bridge to your value
-  - P2 (4-6 sentences): Connect 1-2 specific achievements to their needs, with metrics
-  - P3 (2-3 sentences): Confident close, invite conversation
-- Sign-off: "Best regards," followed by name, phone, email on separate lines
-- Mention "I've attached my resume for your reference."
-
-## Applicant Info
-Name: {applicant_name}
+## Rules
+- Focus on COMPANY needs, not applicant wants
+- Open with company/role insight, NOT "I am writing to apply..."
+- NO clichés: passionate, team player, detail-oriented, excited
+- NO header block (email format), start with greeting
+- 3 paragraphs, 150-250 words: (1) company insight + value bridge, (2) 1-2 achievements with metrics, (3) confident close
+- Sign-off: "Best regards," then name on next line
 
 <qualifications>
-{qualifications_content if qualifications_content else "See resume below"}
+{qualifications_content if qualifications_content else resume_content}
 </qualifications>
 
-<resume>
-{resume_content}
-</resume>
-
-## Job Details
-Company: {company_name}
-Position: {job_title}
-
-<job_description>
+<job>
 {job_description}
-</job_description>
+</job>
 
-## Output
-Return JSON only:
-{{"subject_line": "Name — Job Title Application", "cover_letter": "Full cover letter text with line breaks", "greeting": "Dear Hiring Manager,", "sign_off": "Best regards,\\nFull Name\\nPhone\\nEmail"}}
+## Output (JSON only)
+{{"subject_line": "{applicant_name} — {job_title} Application", "cover_letter": "Dear Hiring Manager,\\n\\n[paragraph 1]\\n\\n[paragraph 2]\\n\\n[paragraph 3]\\n\\nBest regards,\\n{applicant_name}"}}
 """
 
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=2048,
+        max_tokens=1024,
         messages=[
             {"role": "user", "content": prompt}
         ]
