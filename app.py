@@ -757,32 +757,33 @@ if st.session_state.resume_result:
 
     base_filename = f"{clean_filename(person_name)}_{clean_filename(company)}_{clean_filename(job_title)}"
 
+    # Download buttons at the top for visibility
+    st.success("Resume generated successfully!")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.session_state.word_buffer:
+            st.session_state.word_buffer.seek(0)
+            st.download_button(
+                label="Download as Word",
+                data=st.session_state.word_buffer,
+                file_name=f"{base_filename}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                type="primary",
+                use_container_width=True,
+            )
+    with col2:
+        st.download_button(
+            label="Download as Markdown",
+            data=resume_text,
+            file_name=f"{base_filename}.md",
+            mime="text/markdown",
+            use_container_width=True,
+        )
+
     tab1, tab2 = st.tabs(["Tailored Resume", "Changes Made"])
 
     with tab1:
         st.markdown(resume_text)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.download_button(
-                label="Download as Markdown",
-                data=resume_text,
-                file_name=f"{base_filename}.md",
-                mime="text/markdown",
-            )
-
-        with col2:
-            if st.session_state.word_buffer:
-                st.session_state.word_buffer.seek(0)
-                st.download_button(
-                    label="Download as Word",
-                    data=st.session_state.word_buffer,
-                    file_name=f"{base_filename}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                )
-            else:
-                st.info("Upload resume as .docx to get formatted Word output")
 
     with tab2:
         st.subheader("What Was Changed and Why")
