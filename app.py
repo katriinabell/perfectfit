@@ -65,6 +65,20 @@ st.markdown("""
         background-color: rgba(74, 124, 89, 0.1);
         border: 1px solid #4a7c59;
     }
+    .stDownloadButton > button:focus, .stDownloadButton > button:active {
+        border: 1px solid #4a7c59;
+        box-shadow: none;
+    }
+
+    /* Remove red glow from all buttons */
+    button:focus, button:active {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    .stButton > button:focus, .stButton > button:active {
+        box-shadow: none !important;
+        border-color: #4a7c59 !important;
+    }
 
     /* Tab styling */
     .stTabs [data-baseweb="tab-list"] {
