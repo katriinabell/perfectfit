@@ -647,7 +647,7 @@ with col1:
     if os.path.exists(template_path):
         with open(template_path, "rb") as f:
             st.download_button(
-                label="Download template",
+                label="Download Qualifications File Template",
                 data=f,
                 file_name="Qualifications_Template.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
