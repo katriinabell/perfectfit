@@ -283,8 +283,9 @@ Use ONLY the facts present in the resume itself. Do not invent or assume any add
 </job>
 
 ## Rules
-NEVER change: years of experience, job titles, company names, dates, degrees, certifications, metrics, skills listed, separator characters (|, •, -)
-CAN do: reorder bullets by relevance, rephrase using job keywords (if truthful), adjust summary emphasis, use matching action verbs
+NEVER change: years of experience, job titles (keep EXACT original titles - never replace with target job title), company names, dates, degrees, certifications, metrics, skills listed, separator characters (|, •, -)
+CRITICAL: The candidate's job titles are THEIR titles, not the job posting's title. "Software Engineer" stays "Software Engineer" even if applying for "Senior Developer".
+CAN do: reorder bullets by relevance, rephrase bullet DESCRIPTIONS using job keywords (if truthful), adjust summary emphasis, use matching action verbs
 Tense: present for current role, past for previous roles
 
 ## Output (JSON only)
@@ -492,8 +493,9 @@ Use ONLY the facts present in the resume itself. Do not invent or assume any add
 </job>
 
 ## Rules
-NEVER change: years of experience, job titles, company names, dates, degrees, certifications, metrics, skills listed, separator characters (|, •, -)
-CAN do: reorder bullets by relevance, rephrase using job keywords (if truthful), adjust summary emphasis, use matching action verbs
+NEVER change: years of experience, job titles (keep EXACT original titles - never replace with target job title), company names, dates, degrees, certifications, metrics, skills listed, separator characters (|, •, -)
+CRITICAL: The candidate's job titles are THEIR titles, not the job posting's title. "Software Engineer" stays "Software Engineer" even if applying for "Senior Developer".
+CAN do: reorder bullets by relevance, rephrase bullet DESCRIPTIONS using job keywords (if truthful), adjust summary emphasis, use matching action verbs
 Tense: present for current role, past for previous roles
 
 ## Output (JSON only)
