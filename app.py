@@ -156,7 +156,7 @@ with st.sidebar:
     st.markdown("""
     This tool uses Claude AI to analyze and tailor your resume. You provide your own API key so usage costs go directly to Anthropic (not to me).
 
-    **Cost:** ~$0.03-0.06 per resume generated.
+    **Cost:** ~$0.02-0.04 per resume generated.
 
     Get your key at [console.anthropic.com](https://console.anthropic.com)
     """)
@@ -268,116 +268,32 @@ def generate_tailored_resume_structured(
         qualifications_section = """## Note: No separate qualifications file was provided.
 Use ONLY the facts present in the resume itself. Do not invent or assume any additional qualifications."""
 
-    prompt = f"""You are a professional resume writer. Your task is to tailor a resume while PRESERVING ITS EXACT STRUCTURE AND ALL FACTUAL INFORMATION.
+    prompt = f"""Tailor this resume for the job while preserving ALL facts exactly.
 
 {qualifications_section}
 
-## Original Resume Structure
-Each line below is a paragraph from the resume, with its index number and style:
-<resume_structure>
+## Resume (each line: [index] (style): text)
+<resume>
 {structure_text}
-</resume_structure>
+</resume>
 
-## Target Job Description
-<job_description>
+## Job
+<job>
 {job_description}
-</job_description>
+</job>
 
-## Your Task
+## Rules
+NEVER change: years of experience, job titles, company names, dates, degrees, certifications, metrics, skills listed, separator characters (|, •, -)
+CAN do: reorder bullets by relevance, rephrase using job keywords (if truthful), adjust summary emphasis, use matching action verbs
+Tense: present for current role, past for previous roles
 
-Create tailored replacement text for EACH paragraph in the resume. You must:
-1. Keep the SAME NUMBER of paragraphs
-2. Keep paragraphs in the SAME ORDER
-3. Only modify PHRASING to better highlight relevant experience
-4. Preserve ALL factual information exactly as stated in the qualifications
-
-## ABSOLUTE RULES - NEVER VIOLATE THESE:
-
-### Facts you MUST preserve exactly (never change):
-- Years of experience (if they have 4 years, NEVER say 5 years)
-- Job titles
-- Company names
-- Dates of employment
-- Degree names and graduation dates
-- Certification names and dates
-- Specific metrics and numbers (revenue, percentages, team sizes)
-- Technical skills they actually have
-- ALL separator characters (|, •, -, etc.) - preserve exact format like "email | phone | city"
-- Contact information line structure
-
-### What you CAN do:
-- Reorder bullet points to put most relevant first
-- Rephrase descriptions to use keywords from job posting (where truthful)
-- Emphasize certain skills over others
-- Adjust the professional summary to highlight relevant experience
-- Use action verbs that better match the role
-
-### Verb Tense Rules:
-- CURRENT/PRESENT role (ongoing employment): Use PRESENT tense ("Lead", "Manage", "Develop")
-- PAST roles (previous jobs): Use PAST tense ("Led", "Managed", "Developed")
-
-### What you MUST NEVER do:
-- Change years of experience (e.g., "4 years" to "5 years" - FORBIDDEN)
-- Add skills or technologies not in the qualifications
-- Invent metrics or achievements
-- Change job titles or company names
-- Claim certifications they don't have
-- Exaggerate scope or impact of work
-
-### Example of WRONG vs RIGHT:
-
-WRONG (fabrication): Job requires 5 years, candidate has 4 years
-  Original: "4 years of software engineering experience"
-  BAD OUTPUT: "5 years of software engineering experience" ❌ NEVER DO THIS
-
-RIGHT (honest tailoring): Job requires 5 years, candidate has 4 years
-  Original: "4 years of software engineering experience"
-  GOOD OUTPUT: "4 years of software engineering experience" ✓ Keep it truthful
-
-The candidate may not meet every requirement - THAT IS OKAY. Your job is to present their ACTUAL qualifications in the best light, not to fabricate qualifications they don't have.
-
-## Output Format
-
-Return a JSON object with:
-1. "paragraphs" - an array where each item has "index" (matching the original) and "text" (the new/tailored text)
-2. "changes_summary" - array of changes made and why
-3. "filename_parts" - extracted info for naming the file
-
-```json
-{{
-  "paragraphs": [
-    {{"index": 0, "text": "John Smith"}},
-    {{"index": 1, "text": "Senior Software Engineer | john@email.com | (555) 123-4567"}},
-    ...
-  ],
-  "changes_summary": [
-    {{
-      "section": "Professional Summary",
-      "change": "Added emphasis on cloud architecture experience",
-      "reason": "Job requires AWS expertise which candidate has"
-    }}
-  ],
-  "filename_parts": {{
-    "person_name": "JohnSmith",
-    "company": "Acme",
-    "job_title": "SeniorEngineer"
-  }}
-}}
-```
-
-FINAL REMINDER: If the job asks for something the candidate doesn't have (like more years of experience), DO NOT add it. Present their actual qualifications honestly.
-
-For filename_parts:
-- person_name: Extract from resume, remove spaces (e.g., "Katriina Bell" -> "KatriinaBell")
-- company: Extract company name from job description, remove spaces (e.g., "Ziply Fiber" -> "ZiplyFiber")
-- job_title: Extract job title from job description, remove spaces (e.g., "GRC Manager" -> "GRCManager")
-
-Return ONLY valid JSON, no other text.
+## Output (JSON only)
+{{"paragraphs": [{{"index": N, "text": "..."}}], "changes_summary": [{{"section": "...", "change": "...", "reason": "..."}}], "filename_parts": {{"person_name": "FirstLast", "company": "CompanyName", "job_title": "JobTitle"}}}}
 """
 
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=8192,
+        max_tokens=4096,
         messages=[
             {"role": "user", "content": prompt}
         ]
@@ -561,91 +477,32 @@ def generate_tailored_resume_text(
         qualifications_section = """## Note: No separate qualifications file was provided.
 Use ONLY the facts present in the resume itself. Do not invent or assume any additional qualifications."""
 
-    prompt = f"""You are a professional resume writer. Your task is to tailor a resume while PRESERVING ALL FACTUAL INFORMATION.
+    prompt = f"""Tailor this resume for the job while preserving ALL facts exactly.
 
 {qualifications_section}
 
-## Current Resume
-<current_resume>
+## Resume
+<resume>
 {resume_content}
-</current_resume>
+</resume>
 
-## Job Description
-<job_description>
+## Job
+<job>
 {job_description}
-</job_description>
+</job>
 
-## ABSOLUTE RULES - NEVER VIOLATE THESE:
+## Rules
+NEVER change: years of experience, job titles, company names, dates, degrees, certifications, metrics, skills listed, separator characters (|, •, -)
+CAN do: reorder bullets by relevance, rephrase using job keywords (if truthful), adjust summary emphasis, use matching action verbs
+Tense: present for current role, past for previous roles
 
-### Facts you MUST preserve exactly (never change):
-- Years of experience (if they have 4 years, NEVER say 5 years)
-- Job titles
-- Company names
-- Dates of employment
-- Degree names and graduation dates
-- Certification names and dates
-- Specific metrics and numbers (revenue, percentages, team sizes)
-- Technical skills they actually have
-- ALL separator characters (|, •, -, etc.) - preserve exact format like "email | phone | city"
-- Contact information line structure
-
-### What you CAN do:
-- Reorder bullet points to put most relevant first
-- Rephrase descriptions to use keywords from job posting (where truthful)
-- Emphasize certain skills over others
-- Adjust the professional summary to highlight relevant experience
-- Use action verbs that better match the role
-
-### Verb Tense Rules:
-- CURRENT/PRESENT role (ongoing employment): Use PRESENT tense ("Lead", "Manage", "Develop")
-- PAST roles (previous jobs): Use PAST tense ("Led", "Managed", "Developed")
-
-### What you MUST NEVER do:
-- Change years of experience (e.g., "4 years" to "5 years" - FORBIDDEN)
-- Add skills or technologies not in the qualifications
-- Invent metrics or achievements
-- Change job titles or company names
-- Claim certifications they don't have
-- Exaggerate scope or impact of work
-
-### Example of WRONG vs RIGHT:
-
-WRONG: Job requires 5 years, candidate has 4 years
-  BAD: "5 years of experience" ❌ FABRICATION
-
-RIGHT: Job requires 5 years, candidate has 4 years
-  GOOD: "4 years of experience" ✓ HONEST
-
-The candidate may not meet every requirement - THAT IS OKAY. Present their ACTUAL qualifications in the best light, not fabricated ones.
-
-## Output Format
-
-Return JSON:
-```json
-{{
-  "tailored_resume": "Full tailored resume text here...",
-  "changes_summary": [
-    {{"section": "Section name", "change": "What changed", "reason": "Why it helps"}}
-  ],
-  "filename_parts": {{
-    "person_name": "JohnSmith",
-    "company": "Acme",
-    "job_title": "SeniorEngineer"
-  }}
-}}
-```
-
-For filename_parts:
-- person_name: Extract from resume, remove spaces (e.g., "Katriina Bell" -> "KatriinaBell")
-- company: Extract company name from job description, remove spaces
-- job_title: Extract job title from job description, remove spaces
-
-FINAL REMINDER: NEVER change factual information like years of experience. Return ONLY valid JSON.
+## Output (JSON only)
+{{"tailored_resume": "full resume text...", "changes_summary": [{{"section": "...", "change": "...", "reason": "..."}}], "filename_parts": {{"person_name": "FirstLast", "company": "CompanyName", "job_title": "JobTitle"}}}}
 """
 
     message = client.messages.create(
         model="claude-sonnet-4-20250514",
-        max_tokens=8192,
+        max_tokens=4096,
         messages=[
             {"role": "user", "content": prompt}
         ]
