@@ -100,7 +100,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("The Perfect Fit")
+# Display logo instead of text title
+logo_path = os.path.join(os.path.dirname(__file__), "theperfectfitlogo.png")
+if os.path.exists(logo_path):
+    st.image(logo_path, width=300)
+else:
+    st.title("The Perfect Fit")
 st.subheader("Tailor your resume and cover letter")
 st.markdown("Upload a qualifications document and your resume (Word format preferred), then paste in a job description. The app will align your resume to the role, generate a new Word file that preserves your original formatting, and explain every change it made — so you always know what was updated and why. Review the output carefully before sending to ensure accuracy.")
 
