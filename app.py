@@ -194,6 +194,8 @@ Create tailored replacement text for EACH paragraph in the resume. You must:
 - Certification names and dates
 - Specific metrics and numbers (revenue, percentages, team sizes)
 - Technical skills they actually have
+- ALL separator characters (|, •, -, etc.) - preserve exact format like "email | phone | city"
+- Contact information line structure
 
 ### What you CAN do:
 - Reorder bullet points to put most relevant first
@@ -385,25 +387,46 @@ def create_tailored_docx(original_docx_bytes: io.BytesIO, tailored_paragraphs: l
     for i, para in enumerate(doc.paragraphs):
         if i in text_map and para.text.strip():
             new_text = text_map[i]
+            old_text = para.text
 
-            # Strategy: Clear all runs and add new text to first run (preserves paragraph formatting)
-            # But we want to preserve run formatting too, so we'll be smarter
+            # If text is unchanged, skip
+            if new_text == old_text:
+                continue
 
-            if len(para.runs) == 0:
+            runs = para.runs
+            if len(runs) == 0:
                 # No runs, just set text directly
                 para.text = new_text
-            elif len(para.runs) == 1:
+            elif len(runs) == 1:
                 # Single run - just replace text, formatting preserved
-                para.runs[0].text = new_text
+                runs[0].text = new_text
             else:
-                # Multiple runs - preserve formatting of first run, clear others
-                # This keeps the primary formatting (font, size, bold, etc.)
-                first_run = para.runs[0]
-                first_run.text = new_text
+                # Multiple runs - distribute text proportionally to preserve formatting
+                # Calculate original character distribution across runs
+                original_lengths = [len(run.text) for run in runs]
+                total_original = sum(original_lengths)
 
-                # Clear remaining runs
-                for run in para.runs[1:]:
-                    run.text = ""
+                if total_original == 0:
+                    # All runs are empty, put text in first run
+                    runs[0].text = new_text
+                    continue
+
+                # Calculate proportions
+                proportions = [length / total_original for length in original_lengths]
+
+                # Distribute new text across runs based on proportions
+                new_total = len(new_text)
+                position = 0
+
+                for j, run in enumerate(runs):
+                    if j == len(runs) - 1:
+                        # Last run gets remaining text to avoid rounding issues
+                        run.text = new_text[position:]
+                    else:
+                        # Calculate how many characters this run should get
+                        char_count = int(round(proportions[j] * new_total))
+                        run.text = new_text[position:position + char_count]
+                        position += char_count
 
     # Save to buffer
     buffer = io.BytesIO()
@@ -448,6 +471,8 @@ def generate_tailored_resume_text(
 - Certification names and dates
 - Specific metrics and numbers (revenue, percentages, team sizes)
 - Technical skills they actually have
+- ALL separator characters (|, •, -, etc.) - preserve exact format like "email | phone | city"
+- Contact information line structure
 
 ### What you CAN do:
 - Reorder bullet points to put most relevant first
