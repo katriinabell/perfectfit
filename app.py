@@ -153,7 +153,13 @@ if not api_key:
 
 with st.sidebar:
     st.header("API Key")
-    st.markdown("Get your key at [console.anthropic.com](https://console.anthropic.com)")
+    st.markdown("""
+    This tool uses Claude AI to analyze and tailor your resume. You provide your own API key so usage costs go directly to Anthropic (not to me).
+
+    **Cost:** ~$0.01-0.03 per resume generated.
+
+    Get your key at [console.anthropic.com](https://console.anthropic.com)
+    """)
 
     entered_key = st.text_input(
         "Anthropic API Key",
@@ -173,13 +179,15 @@ with st.sidebar:
     st.markdown("""
     ### 1. Prepare Your Files
 
-    **Qualifications file** should include:
-    - All your skills and technologies
-    - Work history with specific achievements
-    - Metrics and numbers
-    - Certifications and education
-
     **Current resume** - Upload as .docx to preserve formatting in the output.
+
+    **Qualifications file** (optional but highly recommended) - A comprehensive document with far more detail than your resume:
+    - All skills and technologies
+    - Detailed work history with specific achievements
+    - Metrics and numbers (revenue, users, %)
+    - Projects, certifications, volunteer work
+
+    This extra context helps the AI select and emphasize the most relevant experience for each job.
 
     ### 2. Add Job Description
 
@@ -250,12 +258,19 @@ def generate_tailored_resume_structured(
         for item in resume_structure
     ])
 
-    prompt = f"""You are a professional resume writer. Your task is to tailor a resume while PRESERVING ITS EXACT STRUCTURE AND ALL FACTUAL INFORMATION.
-
-## Qualifications (SOURCE OF TRUTH - these are the ONLY facts you can use)
+    # Build qualifications section based on whether file was provided
+    if qualifications_content:
+        qualifications_section = f"""## Qualifications (SOURCE OF TRUTH - these are the ONLY facts you can use)
 <qualifications>
 {qualifications_content}
-</qualifications>
+</qualifications>"""
+    else:
+        qualifications_section = """## Note: No separate qualifications file was provided.
+Use ONLY the facts present in the resume itself. Do not invent or assume any additional qualifications."""
+
+    prompt = f"""You are a professional resume writer. Your task is to tailor a resume while PRESERVING ITS EXACT STRUCTURE AND ALL FACTUAL INFORMATION.
+
+{qualifications_section}
 
 ## Original Resume Structure
 Each line below is a paragraph from the resume, with its index number and style:
@@ -536,12 +551,19 @@ def generate_tailored_resume_text(
 ) -> dict:
     """Generate a tailored resume as plain text (for non-docx uploads)."""
 
-    prompt = f"""You are a professional resume writer. Your task is to tailor a resume while PRESERVING ALL FACTUAL INFORMATION.
-
-## Qualifications (SOURCE OF TRUTH - these are the ONLY facts you can use)
+    # Build qualifications section based on whether file was provided
+    if qualifications_content:
+        qualifications_section = f"""## Qualifications (SOURCE OF TRUTH - these are the ONLY facts you can use)
 <qualifications>
 {qualifications_content}
-</qualifications>
+</qualifications>"""
+    else:
+        qualifications_section = """## Note: No separate qualifications file was provided.
+Use ONLY the facts present in the resume itself. Do not invent or assume any additional qualifications."""
+
+    prompt = f"""You are a professional resume writer. Your task is to tailor a resume while PRESERVING ALL FACTUAL INFORMATION.
+
+{qualifications_section}
 
 ## Current Resume
 <current_resume>
@@ -757,9 +779,9 @@ col1, col2 = st.columns(2)
 
 with col1:
     qualifications_file = st.file_uploader(
-        "Qualifications File",
+        "Qualifications File (Optional)",
         type=["txt", "md", "pdf", "docx"],
-        help="Your master list of all skills, achievements, and experience"
+        help="Highly recommended: A detailed document with all your skills, achievements, metrics, and job history — more comprehensive than your resume. This gives the AI more context to selectively highlight the most relevant experience."
     )
 
 with col2:
@@ -782,19 +804,20 @@ st.markdown("---")
 if st.button("Generate Tailored Resume", type="primary", use_container_width=True):
     if not api_key:
         st.error("Please enter your Anthropic API key in the sidebar.")
-    elif not qualifications_file:
-        st.error("Please upload your qualifications file.")
     elif not resume_file:
         st.error("Please upload your current resume.")
     elif not job_description_input:
         st.error("Please paste the job description.")
     else:
-        qualifications_content, _, _ = read_uploaded_file(qualifications_file)
+        # Qualifications file is optional
+        if qualifications_file:
+            qualifications_content, _, _ = read_uploaded_file(qualifications_file)
+        else:
+            qualifications_content = ""
+
         resume_content, docx_bytes, is_docx = read_uploaded_file(resume_file)
 
-        if not qualifications_content:
-            st.error("Could not read qualifications file.")
-        elif not resume_content:
+        if not resume_content:
             st.error("Could not read resume file.")
         else:
             # Store original docx for later use
