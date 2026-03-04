@@ -99,6 +99,7 @@ with st.sidebar:
     """)
 
     st.markdown("---")
+    st.caption("**Privacy:** Your data is processed in memory only and never stored. Resume content is sent to Anthropic's API for processing ([privacy policy](https://www.anthropic.com/privacy)).")
     st.caption("Powered by Claude")
 
 
