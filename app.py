@@ -36,12 +36,104 @@ load_dotenv()
 
 st.set_page_config(
     page_title="Resume Tailor",
-    page_icon="📄",
+    page_icon=None,
     layout="centered",
 )
 
-st.title("📄 Resume Tailor")
-st.markdown("Upload your qualifications and resume, then paste a job posting URL to generate a tailored resume.")
+# Custom CSS for professional styling with soft green tones
+st.markdown("""
+<style>
+    /* Import clean sans-serif font */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    /* Global font */
+    html, body, [class*="css"] {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Headers */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    /* Primary button styling - soft green */
+    .stButton > button[kind="primary"] {
+        background-color: #4a7c59;
+        border: none;
+        color: white;
+        font-weight: 500;
+    }
+    .stButton > button[kind="primary"]:hover {
+        background-color: #3d6b4a;
+        border: none;
+    }
+
+    /* Download buttons */
+    .stDownloadButton > button {
+        background-color: #f8faf8;
+        border: 1px solid #c8d9c8;
+        color: #4a7c59;
+        font-weight: 500;
+    }
+    .stDownloadButton > button:hover {
+        background-color: #e8f0e8;
+        border: 1px solid #4a7c59;
+    }
+
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #f8faf8;
+        border-radius: 4px;
+        padding: 8px 16px;
+        font-weight: 500;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #4a7c59 !important;
+        color: white !important;
+    }
+
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background-color: #f8faf8;
+    }
+
+    /* Success message */
+    .stSuccess {
+        background-color: #e8f5e8;
+        border-left: 4px solid #4a7c59;
+    }
+
+    /* Text area and inputs */
+    .stTextArea textarea, .stTextInput input {
+        border: 1px solid #d0d9d0;
+        border-radius: 4px;
+    }
+    .stTextArea textarea:focus, .stTextInput input:focus {
+        border-color: #4a7c59;
+        box-shadow: 0 0 0 1px #4a7c59;
+    }
+
+    /* File uploader */
+    [data-testid="stFileUploader"] {
+        border: 1px dashed #c8d9c8;
+        border-radius: 4px;
+        padding: 1rem;
+    }
+
+    /* Divider */
+    hr {
+        border-color: #e0e8e0;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.title("Resume Tailor")
+st.markdown("Upload your qualifications and resume, then paste the job description to generate a tailored resume.")
 
 # Initialize session state for results
 if "resume_result" not in st.session_state:
@@ -687,7 +779,7 @@ job_description_input = st.text_area(
 
 st.markdown("---")
 
-if st.button("✨ Generate Tailored Resume", type="primary", use_container_width=True):
+if st.button("Generate Tailored Resume", type="primary", use_container_width=True):
     if not api_key:
         st.error("Please enter your Anthropic API key in the sidebar.")
     elif not qualifications_file:
@@ -773,7 +865,7 @@ if st.session_state.resume_result:
 
     base_filename = f"{clean_filename(person_name)}_{clean_filename(company)}_{clean_filename(job_title)}"
 
-    tab1, tab2 = st.tabs(["📄 Tailored Resume", "🔄 Changes Made"])
+    tab1, tab2 = st.tabs(["Tailored Resume", "Changes Made"])
 
     with tab1:
         st.markdown(resume_text)
@@ -782,7 +874,7 @@ if st.session_state.resume_result:
 
         with col1:
             st.download_button(
-                label="📥 Download as Markdown",
+                label="Download as Markdown",
                 data=resume_text,
                 file_name=f"{base_filename}.md",
                 mime="text/markdown",
@@ -792,7 +884,7 @@ if st.session_state.resume_result:
             if st.session_state.word_buffer:
                 st.session_state.word_buffer.seek(0)
                 st.download_button(
-                    label="📥 Download as Word (.docx)",
+                    label="Download as Word",
                     data=st.session_state.word_buffer,
                     file_name=f"{base_filename}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
