@@ -277,12 +277,14 @@ SUMMARY REPLACEMENT: If the resume has an existing summary/objective section, RE
 BULLET LIMITS: Most recent job: 5-7 bullets. Previous jobs: 3-4 bullets max. Early career jobs: 1-3 bullets only.
 Tense: present for current role, past for previous roles
 
-## CRITICAL FORMATTING RULES
-- Copy the EXACT text structure from each paragraph - same capitalization, same punctuation, same separators
-- Do NOT add extra line breaks, blank lines, or spacing that wasn't in the original
-- Do NOT change bullet point symbols (•, -, *, etc.) or separator characters (|, •, -)
-- Keep the EXACT same number of paragraphs - only modify text WITHIN each paragraph
-- Preserve all whitespace patterns exactly as they appear in the original
+## CRITICAL FORMATTING RULES (violations will break the Word document)
+- Return EXACTLY the same number of paragraphs as the input - one output per input index
+- Each paragraph text must start and end the same way (same first/last characters if unchanged)
+- Do NOT add line breaks (\n) within any paragraph text - each paragraph is a single line
+- Do NOT change bullet symbols (•, -, *, >) or separators (|, •, —, /)
+- Do NOT add extra spaces, tabs, or whitespace
+- Keep text LENGTH similar to original - do not drastically expand or shorten paragraphs
+- Preserve exact punctuation patterns and capitalization style
 
 ## Additional Analysis Required
 1. ATS KEYWORD ANALYSIS: Extract important keywords/skills from job description. List which appear in the tailored resume vs which are missing. Calculate match percentage.
@@ -427,32 +429,24 @@ def create_tailored_docx(original_docx_bytes: io.BytesIO, tailored_paragraphs: l
                 # Single run - just replace text, formatting preserved
                 runs[0].text = new_text
             else:
-                # Multiple runs - distribute text proportionally to preserve formatting
-                # Calculate original character distribution across runs
-                original_lengths = [len(run.text) for run in runs]
-                total_original = sum(original_lengths)
+                # Multiple runs - find the first non-empty run to preserve its formatting
+                # Put ALL text in that run, clear the rest
+                first_content_run = None
+                for run in runs:
+                    if run.text.strip():
+                        first_content_run = run
+                        break
 
-                if total_original == 0:
-                    # All runs are empty, put text in first run
-                    runs[0].text = new_text
-                    continue
+                if first_content_run is None:
+                    first_content_run = runs[0]
 
-                # Calculate proportions
-                proportions = [length / total_original for length in original_lengths]
+                # Put all new text in the first content run
+                first_content_run.text = new_text
 
-                # Distribute new text across runs based on proportions
-                new_total = len(new_text)
-                position = 0
-
-                for j, run in enumerate(runs):
-                    if j == len(runs) - 1:
-                        # Last run gets remaining text to avoid rounding issues
-                        run.text = new_text[position:]
-                    else:
-                        # Calculate how many characters this run should get
-                        char_count = int(round(proportions[j] * new_total))
-                        run.text = new_text[position:position + char_count]
-                        position += char_count
+                # Clear all other runs to avoid duplicate text
+                for run in runs:
+                    if run is not first_content_run:
+                        run.text = ""
 
     # Save to buffer
     buffer = io.BytesIO()
@@ -502,12 +496,13 @@ SUMMARY REPLACEMENT: If the resume has an existing summary/objective section, RE
 BULLET LIMITS: Most recent job: 5-7 bullets. Previous jobs: 3-4 bullets max. Early career jobs: 1-3 bullets only.
 Tense: present for current role, past for previous roles
 
-## CRITICAL FORMATTING RULES
-- Copy the EXACT text structure from the original resume - same capitalization, same punctuation, same separators
-- Do NOT add extra line breaks, blank lines, or spacing that wasn't in the original
-- Do NOT change bullet point symbols (•, -, *, etc.) or separator characters (|, •, -)
-- Keep the EXACT same section order and structure
-- Preserve all whitespace patterns exactly as they appear in the original
+## CRITICAL FORMATTING RULES (violations will break the document)
+- Preserve EXACT structure - same sections, same order, same number of lines
+- Do NOT add line breaks within bullet points - each bullet is a single line
+- Do NOT change bullet symbols (•, -, *, >) or separators (|, •, —, /)
+- Do NOT add extra spaces, tabs, or whitespace
+- Keep text LENGTH similar to original - do not drastically expand or shorten content
+- Preserve exact punctuation patterns and capitalization style
 
 ## Additional Analysis Required
 1. ATS KEYWORD ANALYSIS: Extract important keywords/skills from job description. List which appear in the tailored resume vs which are missing. Calculate match percentage.
