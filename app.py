@@ -272,7 +272,9 @@ Use ONLY the facts present in the resume itself. Do not invent or assume any add
 NEVER change: years of experience, job titles (keep EXACT original titles - never replace with target job title), company names, dates, degrees, certifications, metrics/numbers, separator characters (|, •, -)
 CRITICAL: The candidate's job titles are THEIR titles, not the job posting's title. "Software Engineer" stays "Software Engineer" even if applying for "Senior Developer".
 CAN do: reorder bullets by relevance, rephrase bullet DESCRIPTIONS using job keywords (if truthful), adjust summary emphasis, use matching action verbs
-CAN ALSO do: If qualifications file provided, REPLACE less relevant bullet points with more relevant achievements from qualifications that better match the job. Keep same number of bullets per role. Only use facts from qualifications file.
+CAN ALSO do: If qualifications file provided, REPLACE less relevant bullet points with more relevant achievements from qualifications that better match the job. Only use facts from qualifications file.
+BULLET LIMITS: Most recent job: 5-7 bullets. Previous jobs: 3-4 bullets max. Early career jobs: 1-3 bullets only.
+FORMATTING: Preserve EXACT original formatting - same line breaks, spacing, punctuation style, and structure. Do not add or remove blank lines.
 Tense: present for current role, past for previous roles
 
 ## Output (JSON only)
@@ -483,7 +485,9 @@ Use ONLY the facts present in the resume itself. Do not invent or assume any add
 NEVER change: years of experience, job titles (keep EXACT original titles - never replace with target job title), company names, dates, degrees, certifications, metrics/numbers, separator characters (|, •, -)
 CRITICAL: The candidate's job titles are THEIR titles, not the job posting's title. "Software Engineer" stays "Software Engineer" even if applying for "Senior Developer".
 CAN do: reorder bullets by relevance, rephrase bullet DESCRIPTIONS using job keywords (if truthful), adjust summary emphasis, use matching action verbs
-CAN ALSO do: If qualifications file provided, REPLACE less relevant bullet points with more relevant achievements from qualifications that better match the job. Keep same number of bullets per role. Only use facts from qualifications file.
+CAN ALSO do: If qualifications file provided, REPLACE less relevant bullet points with more relevant achievements from qualifications that better match the job. Only use facts from qualifications file.
+BULLET LIMITS: Most recent job: 5-7 bullets. Previous jobs: 3-4 bullets max. Early career jobs: 1-3 bullets only.
+FORMATTING: Preserve EXACT original formatting - same line breaks, spacing, punctuation style, and structure. Do not add or remove blank lines.
 Tense: present for current role, past for previous roles
 
 ## Output (JSON only)
