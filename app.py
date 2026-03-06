@@ -411,6 +411,22 @@ def create_tailored_docx(original_docx_bytes: io.BytesIO, tailored_paragraphs: l
     original_docx_bytes.seek(0)
     doc = Document(original_docx_bytes)
 
+    def has_special_formatting(run):
+        """Check if a run has special formatting that shouldn't apply to whole paragraph."""
+        return (run.bold is True or
+                run.italic is True or
+                run.underline is True or
+                run.font.strike is True or
+                run.font.double_strike is True)
+
+    def clear_special_formatting(run):
+        """Remove special formatting from a run."""
+        run.bold = False
+        run.italic = False
+        run.underline = False
+        run.font.strike = False
+        run.font.double_strike = False
+
     # Replace text in each paragraph while preserving formatting
     for i, para in enumerate(doc.paragraphs):
         if i in text_map and para.text.strip():
@@ -426,26 +442,48 @@ def create_tailored_docx(original_docx_bytes: io.BytesIO, tailored_paragraphs: l
                 # No runs, just set text directly
                 para.text = new_text
             elif len(runs) == 1:
-                # Single run - just replace text, formatting preserved
+                # Single run - replace text, clear any unwanted special formatting
                 runs[0].text = new_text
+                # Only clear strike formatting as it's definitely unwanted
+                runs[0].font.strike = False
+                runs[0].font.double_strike = False
             else:
-                # Multiple runs - find the first non-empty run to preserve its formatting
-                # Put ALL text in that run, clear the rest
-                first_content_run = None
+                # Multiple runs - find a run with NORMAL formatting (no bold/italic/strike)
+                # This prevents inheriting special formatting meant for specific words
+                best_run = None
+                longest_normal_run = None
+                longest_normal_len = 0
+                longest_run = None
+                longest_len = 0
+
                 for run in runs:
-                    if run.text.strip():
-                        first_content_run = run
-                        break
+                    run_len = len(run.text)
+                    # Track longest run overall
+                    if run_len > longest_len:
+                        longest_len = run_len
+                        longest_run = run
+                    # Track longest run with normal formatting
+                    if not has_special_formatting(run) and run_len > longest_normal_len:
+                        longest_normal_len = run_len
+                        longest_normal_run = run
 
-                if first_content_run is None:
-                    first_content_run = runs[0]
+                # Prefer normal-formatted run, fall back to longest run
+                if longest_normal_run and longest_normal_len > 0:
+                    best_run = longest_normal_run
+                elif longest_run:
+                    best_run = longest_run
+                    # Clear special formatting since we're using a specially-formatted run
+                    clear_special_formatting(best_run)
+                else:
+                    best_run = runs[0]
+                    clear_special_formatting(best_run)
 
-                # Put all new text in the first content run
-                first_content_run.text = new_text
+                # Put all new text in the best run
+                best_run.text = new_text
 
                 # Clear all other runs to avoid duplicate text
                 for run in runs:
-                    if run is not first_content_run:
+                    if run is not best_run:
                         run.text = ""
 
     # Save to buffer
